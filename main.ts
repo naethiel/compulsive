@@ -113,7 +113,7 @@ function bootstrap(): App {
   const app: App = {
     config: config,
     snapshot: "",
-    version: "v1.0.0-dev",
+    version: "v1.0.0",
   };
 
   return app;
