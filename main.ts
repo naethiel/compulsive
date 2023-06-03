@@ -145,7 +145,7 @@ async function bootstrap(): Promise<App> {
   const app: App = {
     config: config,
     snapshot: "",
-    version: "v1.0.0",
+    version: "v1.1.0",
     logger: logger,
     mailer: client,
   };
