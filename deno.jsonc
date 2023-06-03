@@ -1,10 +1,10 @@
 {
   "tasks": {
-    "dev": "deno run --watch --allow-net --allow-read main.ts",
-    "build:linux": "deno compile --allow-net --allow-read -o build/compulsive_x86_64-unknown-linux-gnu --target x86_64-unknown-linux-gnu main.ts",
-    "build:win": "deno compile --allow-net --allow-read -o build/compulsive_x86_64-pc-windows-msvc --target x86_64-pc-windows-msvc main.ts",
-    "build:darwin_x86": "deno compile --allow-net --allow-read -o build/compulsive_x86_64-apple-darwin --target x86_64-apple-darwin main.ts",
-    "build:darwin_arm64": "deno compile --allow-net --allow-read -o build/compulsive_aarch64-apple-darwin --target aarch64-apple-darwin main.ts",
+    "dev": "deno run --watch --allow-net --allow-read --allow-write=./log main.ts",
+    "build:linux": "deno compile --allow-net --allow-read --allow-write=./log -o build/compulsive_x86_64-unknown-linux-gnu --target x86_64-unknown-linux-gnu main.ts",
+    "build:win": "deno compile --allow-net --allow-read --allow-write=./log -o build/compulsive_x86_64-pc-windows-msvc --target x86_64-pc-windows-msvc main.ts",
+    "build:darwin_x86": "deno compile --allow-net --allow-read --allow-write=./log -o build/compulsive_x86_64-apple-darwin --target x86_64-apple-darwin main.ts",
+    "build:darwin_arm64": "deno compile --allow-net --allow-read --allow-write=./log -o build/compulsive_aarch64-apple-darwin --target aarch64-apple-darwin main.ts",
     "build": "deno task build:linux && deno task build:win && deno task build:darwin_x86 && deno task build:darwin_arm64"
   }
 }
