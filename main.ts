@@ -1,10 +1,13 @@
 import * as flags from "https://deno.land/std@0.189.0/flags/mod.ts";
-import { SMTPClient } from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import * as denomailer from "https://deno.land/x/denomailer@1.6.0/mod.ts";
+import Logger from "https://deno.land/x/logger@v1.1.2/logger.ts";
 
 type App = {
   version: string;
   snapshot: string;
   config: Config;
+  logger: Logger;
+  mailer: denomailer.SMTPClient;
 };
 
 type Config = {
@@ -34,19 +37,17 @@ type Config = {
 };
 
 if (import.meta.main) {
-  console.log("initializing Compulsive");
-
-  const app = bootstrap();
-
-  const client = new SMTPClient({ connection: app.config.email.server });
+  const app = await bootstrap();
+  app.logger.info("starting app");
 
   app.snapshot = await fetchUrl(app.config.url);
+
   let isRunning = false;
 
   setInterval(async () => {
-    console.log("checking url...");
+    app.logger.info("checking url...");
     if (isRunning) {
-      console.log("already running, skipping");
+      app.logger.warn("already running, skipping");
       return;
     }
 
@@ -55,14 +56,18 @@ if (import.meta.main) {
     try {
       const check = await fetchUrl(app.config.url);
       if (check === app.snapshot) {
-        console.log("no change detected.");
+        app.logger.info("no change detected, skipping");
         isRunning = false;
         return;
       }
 
-      console.log("change detected. Sending email notification");
+      app.logger.warn("change detected in page");
 
-      client.send({
+      app.logger.warn("sending email notification", {
+        recipients: app.config.email.to,
+      });
+
+      await app.mailer.send({
         to: app.config.email.to.map((to) => ({
           mail: to.address,
           name: to.name,
@@ -72,10 +77,11 @@ if (import.meta.main) {
         content: `${app.config.email.body} - site: ${app.config.url}`,
       });
 
-      console.log("updating snapshot");
+      app.logger.info("mail sent");
+      app.logger.info("updating snapshot");
       app.snapshot = check;
     } catch (err) {
-      console.log("failed to check url", "error", err);
+      app.logger.error("failed to check url", "error", err);
     }
 
     isRunning = false;
@@ -92,7 +98,7 @@ async function fetchUrl(url: string): Promise<string> {
   return res.text();
 }
 
-function bootstrap(): App {
+async function bootstrap(): Promise<App> {
   const args = flags.parse(Deno.args, {
     string: ["configuration"],
   });
@@ -100,20 +106,48 @@ function bootstrap(): App {
     args.configuration = "compulsive.json";
   }
 
+  const logger = new Logger();
+  logger.info("initiated logger");
+  await logger.initFileLogger("./log", {
+    rotate: true,
+  });
+
+  logger.info("initated log files");
+
   let config: Config;
   try {
     const file = Deno.readTextFileSync(args.configuration);
-    console.log("loaded config", file);
+    logger.info("loading config file", { file });
     config = JSON.parse(file);
   } catch (err) {
-    console.error("Couldn't load config file", "error", err);
+    logger.error("Couldn't load config file", err);
     Deno.exit(1);
   }
+
+  // frequency minimum value is 5s.
+  if (config.frequency < 5) {
+    config.frequency = 5;
+  }
+
+  const client = new denomailer.SMTPClient({
+    connection: config.email.server,
+  });
+
+  Deno.addSignalListener("SIGINT", () => {
+    logger.warn("SIGINT recieved. Exiting!");
+    Deno.exit(0);
+  });
+  Deno.addSignalListener("SIGTERM", () => {
+    logger.warn("SIGTERM recieved. Exiting!");
+    Deno.exit(0);
+  });
 
   const app: App = {
     config: config,
     snapshot: "",
     version: "v1.0.0",
+    logger: logger,
+    mailer: client,
   };
 
   return app;
