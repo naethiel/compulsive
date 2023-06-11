@@ -1,14 +1,10 @@
 
 #!/usr/bin/env bash
 
-package=$1
-if [[ -z "$package" ]]; then
-  echo "usage: $0 <package-name>"
-  exit 1
-fi
-package_split=(${package//\// })
-package_name=${package_split[-1]}
-    
+package="."
+package_name="compulsive"
+
+package_split=(${package//\// })    
 platforms=("windows/amd64" "darwin/amd64" "darwin/arm64" "linux/amd64")
 
 for platform in "${platforms[@]}"
