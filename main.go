@@ -114,10 +114,8 @@ func main() {
 	if freq < 5 {
 		freq = 5
 	}
-	ticker := time.NewTicker(time.Second * time.Duration(freq))
-	defer ticker.Stop()
 
-	c := time.Tick(5 * time.Second)
+	c := time.Tick(time.Second * time.Duration(freq))
 	for range c {
 		s.Log.Info("starting a check")
 		if isFetching {
