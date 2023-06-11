@@ -4,16 +4,16 @@ A compulsive url checker.
 
 ## Installation
 
-If you have `deno` installed you can just run it through that
-`$ deno install --allow-net --allow-read https://github.com/naethiel/compulsive/main.ts`
+If you have `go` installed you can just run it through that
+`$ go install https://github.com/naethiel/compulsive`
 
 Other users can just go to the release page and grab a compiled binary.
 
 ## Usage
 
-`compulsive --configuration ./path-to-config-file.json`
+`compulsive`
 
-That's it. Configuration path falls back to `compulsive.json`
+That's it. Configuration file should be defined as `compulsive.json` in the executable's folder.
 
 The configuration file must respect the format given in the `compulsive.example.json` file:
 
