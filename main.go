@@ -110,7 +110,11 @@ func main() {
 	isFetching := false
 	s.Snapshot = html
 
-	ticker := time.NewTicker(time.Second * 10)
+	freq := s.Config.Frequency
+	if freq < 5 {
+		freq = 5
+	}
+	ticker := time.NewTicker(time.Second * time.Duration(freq))
 	defer ticker.Stop()
 
 	c := time.Tick(5 * time.Second)
